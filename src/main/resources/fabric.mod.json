@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "cookie-clicker",
+	"version": "${version}",
+	"name": "cookie-clicker",
+	"description": "This is a cookie based clicker game inspired by cookie clicker, fully running in Minecraft",
+	"authors": [
+		"MegadudeCC"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/cookie-clicker/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.cookie.Cookieclicker"
+		],
+		"client": [
+			"com.cookie.CookieclickerClient"
+		],
+		"fabric-datagen": [
+			"com.cookie.CookieclickerDataGenerator"
+		]
+	},
+	"mixins": [
+		"cookie-clicker.mixins.json",
+		{
+			"config": "cookie-clicker.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
