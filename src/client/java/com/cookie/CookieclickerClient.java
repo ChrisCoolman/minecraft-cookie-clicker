@@ -71,7 +71,7 @@ public class CookieclickerClient implements ClientModInitializer {
 			// If open UI
 			while (openCookieClicker.consumeClick()) {
 				if(client.player != null) {
-					client.player.displayClientMessage(Component.literal("Opening cookie clicker!"), false);
+					//client.player.displayClientMessage(Component.literal("Opening cookie clicker!"), false);
 					Minecraft.getInstance().setScreen( new CookieScreen(Component.empty()));
 
 				}
