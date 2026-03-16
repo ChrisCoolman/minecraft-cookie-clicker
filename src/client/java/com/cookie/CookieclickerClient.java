@@ -2,48 +2,77 @@ package com.cookie;
 
 
 import com.mojang.authlib.minecraft.client.MinecraftClient;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.font.TextRenderable;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.entity.DisplayRenderer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.apache.logging.log4j.core.pattern.TextRenderer;
 import org.joml.Matrix3x2fStack;
+import org.lwjgl.glfw.GLFW;
 
 public class CookieclickerClient implements ClientModInitializer {
 
 	private float totalTickProgress = 0;
 	private float cookieScale = 2.0f;
 
-	public float cookies = 0.0f;
-
 	private boolean wasPressed = false;
+
+	private float ticksPassed = 0;
+
+	public boolean uiEnabled = true;
 
 
 	@Override
 	public void onInitializeClient() {
+
+		Cookie.start();
+
 		HudElementRegistry.addLast(
 				Identifier.fromNamespaceAndPath("cookieclicker", "last_element"),
 				hudLayer()
 		);
+
+		KeyMapping.Category CATEGORY = new KeyMapping.Category(Identifier.fromNamespaceAndPath(Cookieclicker.MOD_ID, "cookie_clicker"));
+
+		KeyMapping openCookieClicker = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.cookie-clicker.open_cookie_clicker", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, CATEGORY));
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			boolean isPressed = client.mouseHandler.isLeftPressed();
 
 			if (isPressed && !wasPressed) {
 				cookieScale = 4.0f;
-				cookies += 1.0f;
+				Cookie.mouseDown();
 			}
 
 			wasPressed = isPressed;
 
 			if (cookieScale > 2.0f) {
 				cookieScale -= 0.2f;
+			}
+
+			// Runs every second - 20 minecraft ticks is one second
+			ticksPassed += 1;
+			if(ticksPassed >= 20) {
+				Cookie.tick();
+				ticksPassed = 0;
+			}
+
+			// If open UI
+			while (openCookieClicker.consumeClick()) {
+				if(client.player != null) {
+					client.player.displayClientMessage(Component.literal("Opening cookie clicker!"), false);
+				}
 			}
 		});
 	}
@@ -56,7 +85,6 @@ public class CookieclickerClient implements ClientModInitializer {
 			if(client.screen != null) {
 				return;
 			}
-
 			totalTickProgress += deltaTracker.getGameTimeDeltaPartialTick(true);
 			Matrix3x2fStack matrices = graphics.pose();
 
@@ -65,7 +93,7 @@ public class CookieclickerClient implements ClientModInitializer {
 			float finalScale = cookieScale + idlePulse;
 
 			// TextRenderer, text (string, or Text object), x, y, color, shadow
-			graphics.drawString(client.font, "Cookies: " + cookies, 5, 10, 0xFFFFFFFF, true);
+			graphics.drawString(client.font, "Cookies: " + Cookie.format(Cookie.cookies), 5, 10, 0xFFFFFFFF, true);
 
 			// Push state
 			matrices.pushMatrix();
