@@ -30,7 +30,7 @@ public class CookieclickerClient implements ClientModInitializer {
 
 	private float ticksPassed = 0;
 
-	public boolean uiEnabled = true;
+	public boolean uiEnabled = false;
 
 
 	@Override
@@ -72,6 +72,8 @@ public class CookieclickerClient implements ClientModInitializer {
 			while (openCookieClicker.consumeClick()) {
 				if(client.player != null) {
 					client.player.displayClientMessage(Component.literal("Opening cookie clicker!"), false);
+					Minecraft.getInstance().setScreen( new CookieScreen(Component.empty()));
+
 				}
 			}
 		});
