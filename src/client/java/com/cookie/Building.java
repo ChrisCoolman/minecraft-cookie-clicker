@@ -1,31 +1,34 @@
 package com.cookie;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class Building {
 
     public String name;
-    public double price;
+    public BigDecimal price;
     public double basePrice;
     public int amountPurchased;
     public double baseCookiesPerSecond;
 
     public Building(String name, double price, double baseCookiesPerSecond) {
         this.name = name;
-        this.price = price;
-        this.basePrice = price;
+        this.price = BigDecimal.valueOf(price);
+        this.basePrice = Double.valueOf(String.valueOf(price));
         this.baseCookiesPerSecond = baseCookiesPerSecond;
         this.amountPurchased = 0;
     }
 
     public void purchase() {
-        if (Cookie.cookies >= calculatePrice()) {
-            Cookie.cookies -= calculatePrice();
+        if (Cookie.cookies.compareTo(calculatePrice()) == 0 || Cookie.cookies.compareTo(calculatePrice()) == 1) {
+            Cookie.cookies = Cookie.cookies.subtract(calculatePrice());
             this.amountPurchased += 1;
         }
     }
 
-    public double calculatePrice() {
-        double num = (this.basePrice * Math.pow(1.15, this.amountPurchased));
-        return ((double) Math.round(num * 100) / 100);
+    public BigDecimal calculatePrice() {
+        BigDecimal num = (BigDecimal.valueOf(this.basePrice).multiply(BigDecimal.valueOf(Math.pow(1.15, this.amountPurchased))));
+        return num.setScale(2, RoundingMode.CEILING);
     }
 
 }

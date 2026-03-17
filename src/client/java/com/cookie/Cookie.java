@@ -1,12 +1,19 @@
 package com.cookie;
 
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
 
 public class Cookie {
-    public static double cookies;
-    public static double cookiesPerClick;
-    public static double cookiesPerSecond;
+    public static BigDecimal cookies;
+    public static BigDecimal cookiesPerClick;
+    public static BigDecimal cookiesPerSecond;
+
+
+    public static final BigDecimal million = BigDecimal.valueOf(1000000);
+    public static final BigDecimal billion = BigDecimal.valueOf(1000000000);
 
 
     // Init buildings
@@ -17,9 +24,9 @@ public class Cookie {
 
     public static void start() {
         // Init values - should not run if saves are added
-        cookies = 0;
-        cookiesPerClick = 1;
-        cookiesPerSecond = 0;
+        cookies = BigDecimal.ZERO;
+        cookiesPerClick = BigDecimal.ONE;
+        cookiesPerSecond = BigDecimal.ZERO;
 
         // Add buildings
         BUILDINGS.add(new Building("Cursor", 15, 0.1));
@@ -69,7 +76,7 @@ public class Cookie {
     }
 
     public static void mouseDown() {
-        cookies += cookiesPerClick;
+        cookies = cookies.add(cookiesPerClick);
     }
 
     public static void mouseUp() {
@@ -77,8 +84,12 @@ public class Cookie {
     }
 
     public static void tick() {
-        cookies += calculateCookiesPerSecond();
-        cookies = ((double) Math.round(cookies * 100) / 100);
+        cookies = cookies.add(calculateCookiesPerSecond());
+
+        // Round to 2 decimal places - https://stackoverflow.com/questions/15643280/rounding-bigdecimal-to-always-have-two-decimal-places
+        cookies = cookies.setScale(2, RoundingMode.CEILING);
+        cookiesPerSecond = cookiesPerSecond.setScale(2, RoundingMode.CEILING);
+        cookiesPerClick = cookiesPerClick.setScale(2, RoundingMode.CEILING);
 
 
         // Gets ever upgrade
@@ -91,19 +102,24 @@ public class Cookie {
         }
     }
 
-    public static String format(double num) {
+    public static String format(BigDecimal num) {
 
-        if(num > 1000) {
-            num = num / 1000;
-            return Double.toString(num) + " thousand";
+        // Compare to returns 1 for greater than
+        if(num.compareTo(billion) == 1) {
+            num = num.divide(billion);
+            return num.toString() + " billion";
         }
-        return Double.toString(num);
+        else if(num.compareTo(million) == 1) {
+            num = num.divide(million);
+            return num.toString() + " million";
+        }
+        return num.toString();
     }
 
-    public static double calculateCookiesPerSecond() {
-        double num = 0;
+    public static BigDecimal calculateCookiesPerSecond() {
+        BigDecimal num = BigDecimal.valueOf(0);
         for(int i = 0; i < BUILDINGS.size(); i++) {
-            num += BUILDINGS.get(i).amountPurchased * BUILDINGS.get(i).baseCookiesPerSecond;
+            num = num.add(BigDecimal.valueOf(BUILDINGS.get(i).amountPurchased * BUILDINGS.get(i).baseCookiesPerSecond));
         }
         cookiesPerSecond = num;
         return num;

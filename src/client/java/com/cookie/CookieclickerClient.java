@@ -25,9 +25,6 @@ public class CookieclickerClient implements ClientModInitializer {
 
 	private float ticksPassed = 0;
 
-	public boolean uiEnabled = false;
-
-
 	@Override
 	public void onInitializeClient() {
 

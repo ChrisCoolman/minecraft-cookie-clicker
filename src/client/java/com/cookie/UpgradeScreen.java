@@ -29,7 +29,7 @@ public class UpgradeScreen extends Screen {
                 this.rebuildWidgets(); // refresh when bought
             }).bounds(x, y, buttonWidth, 20).build();
 
-            if (Cookie.cookies < u.price) {
+            if (Cookie.cookies.compareTo(u.price) == -1) {
                 button.active = false;
             }
             else {

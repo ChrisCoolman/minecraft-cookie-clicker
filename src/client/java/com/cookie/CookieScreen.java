@@ -28,7 +28,7 @@ public class CookieScreen extends Screen {
                 this.rebuildWidgets(); // refresh when bought
             }).bounds(x, y, buttonWidth, 20).build();
 
-            if (Cookie.cookies < b.calculatePrice()) {
+            if (Cookie.cookies.compareTo(b.calculatePrice()) == -1) {
                 button.active = false;
             }
             else {
