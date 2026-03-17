@@ -1,10 +1,14 @@
 package com.cookie;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 
 public class UpgradeScreen extends Screen {
     public UpgradeScreen(Component title) {
@@ -26,8 +30,10 @@ public class UpgradeScreen extends Screen {
             Button button = Button.builder(Component.literal(" Purchase " + u.name + " -  " + u.price), (btn) -> {
                 u.purchase();
                 Cookie.UPGRADES.remove(u);
+                // Levelup sound
+                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.PLAYER_LEVELUP, 1.0f));
                 this.rebuildWidgets(); // refresh when bought
-            }).bounds(x, y, buttonWidth, 20).build();
+            }).bounds(x, y, buttonWidth, 20).tooltip(Tooltip.create(Component.literal(u.generateTooltip()))).build();
 
             if (Cookie.cookies.compareTo(u.price) == -1) {
                 button.active = false;

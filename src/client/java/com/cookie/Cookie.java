@@ -10,6 +10,7 @@ public class Cookie {
     public static BigDecimal cookies;
     public static BigDecimal cookiesPerClick;
     public static BigDecimal cookiesPerSecond;
+    public static BigDecimal maxCookies;
 
 
     public static final BigDecimal million = BigDecimal.valueOf(1000000);
@@ -27,20 +28,23 @@ public class Cookie {
         cookies = BigDecimal.ZERO;
         cookiesPerClick = BigDecimal.ONE;
         cookiesPerSecond = BigDecimal.ZERO;
+        maxCookies = BigDecimal.ZERO;
 
         // Add buildings
-        BUILDINGS.add(new Building("Cursor", 15, 0.1));
-        BUILDINGS.add(new Building("Grandma", 100, 1));
-        BUILDINGS.add(new Building("Farm", 1100, 8));
-        BUILDINGS.add(new Building("Mine", 12000, 47));
-        BUILDINGS.add(new Building("Factory", 130000, 260));
-        BUILDINGS.add(new Building("Bank", 1400000, 1400));
-        BUILDINGS.add(new Building("Temple", 20000000, 7800));
-        BUILDINGS.add(new Building("Wizard Tower", 330000000, 44000));
+        BUILDINGS.clear();
+        BUILDINGS.add(new Building("Cursor", 15, 0.1, BigDecimal.valueOf(0)));
+        BUILDINGS.add(new Building("Grandma", 100, 1, BigDecimal.valueOf(0)));
+        BUILDINGS.add(new Building("Farm", 1100, 8, BigDecimal.valueOf(100)));
+        BUILDINGS.add(new Building("Mine", 12000, 47, BigDecimal.valueOf(1000)));
+        BUILDINGS.add(new Building("Factory", 130000, 260, BigDecimal.valueOf(10000)));
+        BUILDINGS.add(new Building("Bank", 1400000, 1400, BigDecimal.valueOf(100000)));
+        BUILDINGS.add(new Building("Temple", 20000000, 7800, BigDecimal.valueOf(1000000)));
+        BUILDINGS.add(new Building("Wizard Tower", 330000000, 44000, BigDecimal.valueOf(10000000)));
 
         // Add upgrades
-
+        UPGRADES.clear();
         // Cursor upgrades
+        TOTAL_UPGRADES.clear();
         TOTAL_UPGRADES.add(new Upgrade("Reinforced index finger", 100, "Cursor", 2, 1));
         TOTAL_UPGRADES.add(new Upgrade("Carpal tunnel prevention cream", 500, "Cursor", 2, 1));
         TOTAL_UPGRADES.add(new Upgrade("Ambidextrous", 10000, "Cursor", 2, 10));
@@ -49,7 +53,7 @@ public class Cookie {
         TOTAL_UPGRADES.add(new Upgrade("Steel-plated rolling pins", 5000, "Grandma", 2, 5));
         TOTAL_UPGRADES.add(new Upgrade("Lubricated dentures", 50000, "Grandma", 2, 25));
         TOTAL_UPGRADES.add(new Upgrade("Prune juice", 5000000, "Grandma", 2, 50));
-        TOTAL_UPGRADES.add(new Upgrade("Double-thick glasses", 500000000, "Grandma", 2, 100));
+        TOTAL_UPGRADES.add(new Upgrade("Double-thhick glasses", 500000000, "Grandma", 2, 100));
         //TOTAL_UPGRADES.add(new Upgrade("Aging agents", 50000000000, "Grandma", 2, 5));
         //TOTAL_UPGRADES.add(new Upgrade("Xtreme walkers", 50000000000000, "Grandma", 2, 5));
         // Farm upgrades
@@ -91,6 +95,9 @@ public class Cookie {
         cookiesPerSecond = cookiesPerSecond.setScale(2, RoundingMode.CEILING);
         cookiesPerClick = cookiesPerClick.setScale(2, RoundingMode.CEILING);
 
+        if(cookies.compareTo(maxCookies) >= 0) {
+            maxCookies = cookies;
+        }
 
         // Gets ever upgrade
         for(int i = 0; i < TOTAL_UPGRADES.size(); i++) {
@@ -105,12 +112,12 @@ public class Cookie {
     public static String format(BigDecimal num) {
 
         // Compare to returns 1 for greater than
-        if(num.compareTo(billion) == 1) {
-            num = num.divide(billion);
+        if(num.compareTo(billion) >= 0) {
+            num = num.divide(billion, 2, RoundingMode.HALF_UP);
             return num.toString() + " billion";
         }
-        else if(num.compareTo(million) == 1) {
-            num = num.divide(million);
+        else if(num.compareTo(million) >= 0) {
+            num = num.divide(million, 2, RoundingMode.HALF_UP);
             return num.toString() + " million";
         }
         return num.toString();

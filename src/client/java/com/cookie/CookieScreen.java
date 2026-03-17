@@ -3,6 +3,7 @@ package com.cookie;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -21,24 +22,26 @@ public class CookieScreen extends Screen {
 
         for (int i = 0; i < Cookie.BUILDINGS.size(); i++) {
             Building b = Cookie.BUILDINGS.get(i);
-            int y = startY + (i * spacing);
+            if(b.requiredCookies.compareTo(Cookie.maxCookies) <= 0) {
+                int y = startY + (i * spacing);
 
-            Button button = Button.builder(Component.literal(b.amountPurchased + " Purchase " + b.name + " -  " + b.calculatePrice()), (btn) -> {
-                b.purchase();
-                this.rebuildWidgets(); // refresh when bought
-            }).bounds(x, y, buttonWidth, 20).build();
+                Button button = Button.builder(Component.literal(b.amountPurchased + " Purchase " + b.name + " -  " + b.calculatePrice()), (btn) -> {
+                    b.purchase();
+                    this.rebuildWidgets(); // refresh when bought
+                }).bounds(x, y, buttonWidth, 20).tooltip(Tooltip.create(Component.literal(b.generateTooltip()))).build();
+                // x, y, width, height
+                // always make height 20
 
-            if (Cookie.cookies.compareTo(b.calculatePrice()) == -1) {
-                button.active = false;
+                if (Cookie.cookies.compareTo(b.calculatePrice()) == -1) {
+                    button.active = false;
+                }
+                else {
+                    button.active = true;
+                }
+                this.addRenderableWidget(button);
             }
-            else {
-                button.active = true;
-            }
 
 
-            this.addRenderableWidget(button);
-            // x, y, width, height
-            // always make height 20
         }
     }
 

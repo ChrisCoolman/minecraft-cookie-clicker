@@ -27,4 +27,8 @@ public class Upgrade {
             Cookie.getBuilding(this.building).baseCookiesPerSecond *= multiplier;
         }
     }
+
+    public String generateTooltip() {
+        return name + "s are twice as efficient";
+    }
 }
