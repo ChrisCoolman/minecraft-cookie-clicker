@@ -8,10 +8,10 @@ public class Building {
     public int amountPurchased;
     public double baseCookiesPerSecond;
 
-    public Building(String name, double price, double basePrice, double baseCookiesPerSecond) {
+    public Building(String name, double price, double baseCookiesPerSecond) {
         this.name = name;
         this.price = price;
-        this.basePrice = basePrice;
+        this.basePrice = price;
         this.baseCookiesPerSecond = baseCookiesPerSecond;
         this.amountPurchased = 0;
     }
@@ -20,7 +20,6 @@ public class Building {
         if (Cookie.cookies >= calculatePrice()) {
             Cookie.cookies -= calculatePrice();
             this.amountPurchased += 1;
-            Cookie.cookiesPerSecond += this.baseCookiesPerSecond;
         }
     }
 

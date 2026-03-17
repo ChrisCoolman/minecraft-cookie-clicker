@@ -1,23 +1,18 @@
 package com.cookie;
 
 
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.font.TextRenderable;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.entity.DisplayRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import org.apache.logging.log4j.core.pattern.TextRenderer;
 import org.joml.Matrix3x2fStack;
 import org.lwjgl.glfw.GLFW;
 
@@ -45,7 +40,9 @@ public class CookieclickerClient implements ClientModInitializer {
 
 		KeyMapping.Category CATEGORY = new KeyMapping.Category(Identifier.fromNamespaceAndPath(Cookieclicker.MOD_ID, "cookie_clicker"));
 
-		KeyMapping openCookieClicker = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.cookie-clicker.open_cookie_clicker", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, CATEGORY));
+		KeyMapping openBuildings = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.cookie-clicker.open_buildings_screen", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, CATEGORY));
+		KeyMapping openUpgrades = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.cookie-clicker.open_upgrades_screen", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, CATEGORY));
+
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			boolean isPressed = client.mouseHandler.isLeftPressed();
@@ -68,12 +65,18 @@ public class CookieclickerClient implements ClientModInitializer {
 				ticksPassed = 0;
 			}
 
-			// If open UI
-			while (openCookieClicker.consumeClick()) {
+			// If open Buildings
+			while (openBuildings.consumeClick()) {
 				if(client.player != null) {
 					//client.player.displayClientMessage(Component.literal("Opening cookie clicker!"), false);
 					Minecraft.getInstance().setScreen( new CookieScreen(Component.empty()));
-
+				}
+			}
+			// If open Upgrades
+			while (openUpgrades.consumeClick()) {
+				if(client.player != null) {
+					//client.player.displayClientMessage(Component.literal("Opening cookie clicker!"), false);
+					Minecraft.getInstance().setScreen( new UpgradeScreen(Component.empty()));
 				}
 			}
 		});
