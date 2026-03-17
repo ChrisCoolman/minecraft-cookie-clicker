@@ -98,7 +98,8 @@ public class CookieclickerClient implements ClientModInitializer {
 			float finalScale = cookieScale + idlePulse;
 
 			// TextRenderer, text (string, or Text object), x, y, color, shadow
-			graphics.drawString(client.font, "Cookies: " + Cookie.format(Cookie.cookies), 5, 10, 0xFFFFFFFF, true);
+			graphics.drawString(client.font, "Cookies: " + Cookie.format(Cookie.cookies), 2, 5, 0xFFFFFFFF, true);
+			graphics.drawString(client.font, "Cookies Per Second: " + Cookie.format(Cookie.cookiesPerSecond), 2, 15, 0xFFFFFFFF, true);
 
 			// Push state
 			matrices.pushMatrix();

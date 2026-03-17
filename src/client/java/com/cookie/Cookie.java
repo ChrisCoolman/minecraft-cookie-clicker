@@ -32,16 +32,29 @@ public class Cookie {
         BUILDINGS.add(new Building("Wizard Tower", 330000000, 44000));
 
         // Add upgrades
+
         // Cursor upgrades
-        TOTAL_UPGRADES.add(new Upgrade("Reinforced index finger", 100, "Cursor", 2, 0, 1, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Carpal tunnel prevention cream", 500, "Cursor", 2, 0, 5, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Ambidextrous", 10000, "Cursor", 2, 0, 10, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Reinforced index finger", 100, "Cursor", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Carpal tunnel prevention cream", 500, "Cursor", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Ambidextrous", 10000, "Cursor", 2, 10));
         // Grandma upgrades
-        TOTAL_UPGRADES.add(new Upgrade("Forwards from grandma", 1000, "Grandma", 2, 0, 1, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Steel-plated rolling pins", 5000, "Grandma", 2, 0, 5, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Forwards from grandma", 1000, "Grandma", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Steel-plated rolling pins", 5000, "Grandma", 2, 5));
+        TOTAL_UPGRADES.add(new Upgrade("Lubricated dentures", 50000, "Grandma", 2, 25));
+        TOTAL_UPGRADES.add(new Upgrade("Prune juice", 5000000, "Grandma", 2, 50));
+        TOTAL_UPGRADES.add(new Upgrade("Double-thick glasses", 500000000, "Grandma", 2, 100));
+        //TOTAL_UPGRADES.add(new Upgrade("Aging agents", 50000000000, "Grandma", 2, 5));
+        //TOTAL_UPGRADES.add(new Upgrade("Xtreme walkers", 50000000000000, "Grandma", 2, 5));
         // Farm upgrades
-        TOTAL_UPGRADES.add(new Upgrade("Cheap hoes", 11000, "Farm", 2, 0, 1, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Fertilizer", 55000, "Farm", 2, 0, 5, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Cheap hoes", 11000, "Farm", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Fertilizer", 55000, "Farm", 2, 5));
+        TOTAL_UPGRADES.add(new Upgrade("Cookie trees", 550000, "Farm", 2, 25));
+        TOTAL_UPGRADES.add(new Upgrade("Genetically-modified cookies", 55000000, "Farm", 2, 50));
+        // Mine upgrades
+        TOTAL_UPGRADES.add(new Upgrade("Sugar gas", 120000, "Farm", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Megadrill", 600000, "Farm", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Ultradrill", 6000000, "Farm", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Ultimadrill", 600000000, "Farm", 2, 1));
     }
 
     // Takes a name as input and finds a building with that name
@@ -67,20 +80,14 @@ public class Cookie {
         cookies += calculateCookiesPerSecond();
         cookies = ((double) Math.round(cookies * 100) / 100);
 
-        for(int i = 0; i < TOTAL_UPGRADES.size(); i++) {
-            if(TOTAL_UPGRADES.get(i).unlockFactor == 0) {
-                if(cookies >= TOTAL_UPGRADES.get(i).unlockCookies && !TOTAL_UPGRADES.get(i).isUnlocked) {
-                    UPGRADES.add(TOTAL_UPGRADES.get(i));
-                    TOTAL_UPGRADES.get(i).isUnlocked = true;
-                }
-            }
-            else {
-                if(getBuilding(TOTAL_UPGRADES.get(i).building).amountPurchased >= TOTAL_UPGRADES.get(i).unlockBuildingCount && !TOTAL_UPGRADES.get(i).isUnlocked) {
-                    UPGRADES.add(TOTAL_UPGRADES.get(i));
-                    TOTAL_UPGRADES.get(i).isUnlocked = true;
-                }
-            }
 
+        // Gets ever upgrade
+        for(int i = 0; i < TOTAL_UPGRADES.size(); i++) {
+            // If you have enough buildings and the upgrade is not unlocked give the upgrade
+            if(getBuilding(TOTAL_UPGRADES.get(i).building).amountPurchased >= TOTAL_UPGRADES.get(i).unlockBuildingCount && !TOTAL_UPGRADES.get(i).isUnlocked) {
+                UPGRADES.add(TOTAL_UPGRADES.get(i));
+                TOTAL_UPGRADES.get(i).isUnlocked = true;
+            }
         }
     }
 
@@ -98,6 +105,7 @@ public class Cookie {
         for(int i = 0; i < BUILDINGS.size(); i++) {
             num += BUILDINGS.get(i).amountPurchased * BUILDINGS.get(i).baseCookiesPerSecond;
         }
+        cookiesPerSecond = num;
         return num;
     }
 

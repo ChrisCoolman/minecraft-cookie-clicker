@@ -11,17 +11,12 @@ public class Upgrade {
     public double unlockBuildingCount;
     public int unlockFactor;
 
-    public Upgrade(String name, double price, String building, double multiplier, double unlockCookies, double unlockBuildingCount, int unlockFactor) {
+    public Upgrade(String name, double price, String building, double multiplier, double unlockBuildingCount) {
         this.name = name;
         this.price = price;
         this.building = building;
         this.multiplier = multiplier;
-        this.unlockCookies = unlockCookies;
         this.unlockBuildingCount = unlockBuildingCount;
-
-        //Unlock factor is for cookies or buildings
-        // 0 is cookies and 1 is buildings
-        this.unlockFactor = unlockFactor;
     }
 
     public void purchase() {
