@@ -1,6 +1,12 @@
 package com.cookie;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,10 +17,13 @@ public class Cookie {
     public static BigDecimal cookiesPerClick;
     public static BigDecimal cookiesPerSecond;
     public static BigDecimal maxCookies;
+    public static Double milk;
+    public static Double milkFactor;
 
 
-    public static final BigDecimal million = BigDecimal.valueOf(1000000);
-    public static final BigDecimal billion = BigDecimal.valueOf(1000000000);
+    public static final BigDecimal million = BigDecimal.valueOf(Math.pow(10, 6));
+    public static final BigDecimal billion = BigDecimal.valueOf(Math.pow(10, 9));
+    public static final BigDecimal trillion = BigDecimal.valueOf(Math.pow(10, 12));
 
 
     // Init buildings
@@ -23,12 +32,16 @@ public class Cookie {
     public static final List<Upgrade> TOTAL_UPGRADES = new ArrayList<>();
     public static List<Upgrade> UPGRADES = new ArrayList<>();
 
+    public static final List<Kitten> TOTAL_KITTENS = new ArrayList<>();
+    public static List<Kitten> KITTENS = new ArrayList<>();
+
     public static void start() {
         // Init values - should not run if saves are added
         cookies = BigDecimal.ZERO;
         cookiesPerClick = BigDecimal.ONE;
         cookiesPerSecond = BigDecimal.ZERO;
         maxCookies = BigDecimal.ZERO;
+        milkFactor = 0.0;
 
         // Add buildings
         BUILDINGS.clear();
@@ -43,8 +56,14 @@ public class Cookie {
 
         // Add upgrades
         UPGRADES.clear();
-        // Cursor upgrades
         TOTAL_UPGRADES.clear();
+        TOTAL_KITTENS.clear();
+
+        TOTAL_KITTENS.add(new Kitten("Kitten helpers", (million.multiply(BigDecimal.valueOf(9))), 0.52, 0.1, false));
+        TOTAL_KITTENS.add(new Kitten("Kitten workers", (billion.multiply(BigDecimal.valueOf(9))), 1.0, 0.125, false));
+        TOTAL_KITTENS.add(new Kitten("Kitten engineers", (trillion.multiply(BigDecimal.valueOf(90))), 2.0, 0.15, false));
+
+        // Cursor upgrades
         TOTAL_UPGRADES.add(new Upgrade("Reinforced index finger", 100, "Cursor", 2, 1));
         TOTAL_UPGRADES.add(new Upgrade("Carpal tunnel prevention cream", 500, "Cursor", 2, 1));
         TOTAL_UPGRADES.add(new Upgrade("Ambidextrous", 10000, "Cursor", 2, 10));
@@ -81,30 +100,43 @@ public class Cookie {
 
     public static void mouseDown() {
         cookies = cookies.add(cookiesPerClick);
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.GENERIC_EAT, 0.8f + (float) Math.random() * 0.4f));
     }
 
     public static void mouseUp() {
 
     }
 
+    // Runs every second
     public static void tick() {
         cookies = cookies.add(calculateCookiesPerSecond());
 
         // Round to 2 decimal places - https://stackoverflow.com/questions/15643280/rounding-bigdecimal-to-always-have-two-decimal-places
         cookies = cookies.setScale(2, RoundingMode.CEILING);
-        cookiesPerSecond = cookiesPerSecond.setScale(2, RoundingMode.CEILING);
+        cookiesPerSecond = cookiesPerSecond.setScale(2, RoundingMode.CEILING).multiply(BigDecimal.valueOf(1 + milkFactor));
         cookiesPerClick = cookiesPerClick.setScale(2, RoundingMode.CEILING);
 
-        if(cookies.compareTo(maxCookies) >= 0) {
+        if (cookies.compareTo(maxCookies) >= 0) {
             maxCookies = cookies;
         }
 
-        // Gets ever upgrade
-        for(int i = 0; i < TOTAL_UPGRADES.size(); i++) {
+        // Milk
+        milk = getMilk();
+
+        // Gets every upgrade
+        for (int i = 0; i < TOTAL_UPGRADES.size(); i++) {
             // If you have enough buildings and the upgrade is not unlocked give the upgrade
-            if(getBuilding(TOTAL_UPGRADES.get(i).building).amountPurchased >= TOTAL_UPGRADES.get(i).unlockBuildingCount && !TOTAL_UPGRADES.get(i).isUnlocked) {
+            if (getBuilding(TOTAL_UPGRADES.get(i).building).amountPurchased >= TOTAL_UPGRADES.get(i).unlockBuildingCount && !TOTAL_UPGRADES.get(i).isUnlocked) {
                 UPGRADES.add(TOTAL_UPGRADES.get(i));
                 TOTAL_UPGRADES.get(i).isUnlocked = true;
+            }
+        }
+
+        // Gets every kitten
+        for (int i = 0; i < TOTAL_KITTENS.size(); i++) {
+            if (TOTAL_KITTENS.get(i).unlockMilk < getMilk() && !TOTAL_KITTENS.get(i).purchased) {
+                TOTAL_KITTENS.get(i).purchased = true;
+                KITTENS.add(TOTAL_KITTENS.get(i));
             }
         }
     }
@@ -112,11 +144,14 @@ public class Cookie {
     public static String format(BigDecimal num) {
 
         // Compare to returns 1 for greater than
-        if(num.compareTo(billion) >= 0) {
+        if (num.compareTo(trillion) >= 0) {
+            num = num.divide(trillion, 2, RoundingMode.HALF_UP);
+            return num.toString() + " trillion";
+        }
+        else if (num.compareTo(billion) >= 0) {
             num = num.divide(billion, 2, RoundingMode.HALF_UP);
             return num.toString() + " billion";
-        }
-        else if(num.compareTo(million) >= 0) {
+        } else if (num.compareTo(million) >= 0) {
             num = num.divide(million, 2, RoundingMode.HALF_UP);
             return num.toString() + " million";
         }
@@ -125,11 +160,35 @@ public class Cookie {
 
     public static BigDecimal calculateCookiesPerSecond() {
         BigDecimal num = BigDecimal.valueOf(0);
-        for(int i = 0; i < BUILDINGS.size(); i++) {
+        for (int i = 0; i < BUILDINGS.size(); i++) {
             num = num.add(BigDecimal.valueOf(BUILDINGS.get(i).amountPurchased * BUILDINGS.get(i).baseCookiesPerSecond));
         }
         cookiesPerSecond = num;
         return num;
     }
 
+    public static Double getMilk() {
+        // Maps cookies from 1000 to 1 trillion to 0 - 2 for the percent of milk
+        // I will not add achievements
+        if (maxCookies.compareTo(BigDecimal.valueOf(1000)) <= 0) {
+            return 0d;
+        } else {
+            double log = Math.log10(maxCookies.doubleValue());
+            double progress = (log - 3.0) / 9.0;
+            return Math.clamp(progress, 0.0, 2.0);
+        }
+    }
+
+    public static int milkSize(int height, double milk) {
+        if (maxCookies.compareTo(BigDecimal.valueOf(1000)) <= 0) {
+            return height;
+        } else {
+            // 40%
+            double heightPerc = Math.min(milk, 1.0);
+            int maxHeight = (int) (height / 4);
+            int currentHeight = (int) (heightPerc * maxHeight);
+            return height - currentHeight;
+        }
+    }
 }
+

@@ -25,7 +25,7 @@ public class CookieScreen extends Screen {
             if(b.requiredCookies.compareTo(Cookie.maxCookies) <= 0) {
                 int y = startY + (i * spacing);
 
-                Button button = Button.builder(Component.literal(b.amountPurchased + " Purchase " + b.name + " -  " + b.calculatePrice()), (btn) -> {
+                Button button = Button.builder(Component.literal(b.amountPurchased + " Purchase " + b.name + " -  " + Cookie.format(b.calculatePrice())), (btn) -> {
                     b.purchase();
                     this.rebuildWidgets(); // refresh when bought
                 }).bounds(x, y, buttonWidth, 20).tooltip(Tooltip.create(Component.literal(b.generateTooltip()))).build();

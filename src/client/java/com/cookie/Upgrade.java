@@ -29,6 +29,6 @@ public class Upgrade {
     }
 
     public String generateTooltip() {
-        return name + "s are twice as efficient";
+        return building + "s are twice as efficient";
     }
 }

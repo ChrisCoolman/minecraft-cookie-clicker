@@ -47,6 +47,34 @@ public class UpgradeScreen extends Screen {
             // x, y, width, height
             // always make height 20
         }
+
+        // KITTENS
+        for (int i = 0; i < Cookie.KITTENS.size(); i++) {
+            Kitten u = Cookie.KITTENS.get(i);
+            int y = startY + (i * spacing);
+
+            Button button = Button.builder(Component.literal(" Purchase " + u.name + " -  " + Cookie.format(u.price)), (btn) -> {
+                u.purchased = true;
+                Cookie.KITTENS.remove(u);
+                // Levelup sound
+                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.PLAYER_LEVELUP, 1.0f));
+                this.rebuildWidgets(); // refresh when bought
+            }).bounds(x, y, buttonWidth, 20).tooltip(Tooltip.create(Component.literal("You gain more CpS the more milk you have"))).build();
+
+            if (Cookie.cookies.compareTo(u.price) == -1) {
+                button.active = false;
+            }
+            else {
+                button.active = true;
+            }
+
+            Cookie.milkFactor += u.milkFactor;
+
+
+            this.addRenderableWidget(button);
+            // x, y, width, height
+            // always make height 20
+        }
     }
 
     @Override

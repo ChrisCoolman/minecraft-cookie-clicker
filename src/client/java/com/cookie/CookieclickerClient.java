@@ -10,16 +10,20 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import org.joml.Matrix3x2fStack;
 import org.lwjgl.glfw.GLFW;
 
+import java.math.BigDecimal;
+
 public class CookieclickerClient implements ClientModInitializer {
 
 	private float totalTickProgress = 0;
-	private float cookieScale = 2.0f;
+	private float cookieScale = 4.0f;
 
 	private boolean wasPressed = false;
 
@@ -45,13 +49,13 @@ public class CookieclickerClient implements ClientModInitializer {
 			boolean isPressed = client.mouseHandler.isLeftPressed();
 
 			if (isPressed && !wasPressed) {
-				cookieScale = 4.0f;
+				cookieScale = 8.0f;
 				Cookie.mouseDown();
 			}
 
 			wasPressed = isPressed;
 
-			if (cookieScale > 2.0f) {
+			if (cookieScale > 4.0f) {
 				cookieScale -= 0.2f;
 			}
 
@@ -97,6 +101,11 @@ public class CookieclickerClient implements ClientModInitializer {
 			// TextRenderer, text (string, or Text object), x, y, color, shadow
 			graphics.drawString(client.font, "Cookies: " + Cookie.format(Cookie.cookies), 2, 5, 0xFFFFFFFF, true);
 			graphics.drawString(client.font, "Cookies Per Second: " + Cookie.format(Cookie.cookiesPerSecond), 2, 15, 0xFFFFFFFF, true);
+			graphics.drawString(client.font, "Max Cookies: " + Cookie.format(Cookie.maxCookies), 2, 25, 0xFFFFFFFF, true);
+			graphics.drawString(client.font, "Milk%: " + Cookie.format(BigDecimal.valueOf(Cookie.getMilk())), 2, 35, 0xFFFFFFFF, true);
+
+			// Draw milk
+			graphics.fill(0, Cookie.milkSize(graphics.guiHeight(), Cookie.getMilk()), graphics.guiWidth(), graphics.guiHeight(), 0x66FFFFFF);
 
 			// Push state
 			matrices.pushMatrix();
