@@ -1,2 +1,6 @@
-# Minecraft Cookie Clicker
-Cookie clicker minigame running on Fabric Mod Loader for 1.21.11
+# Cookie Clicker in Minecraft
+This is a recreation of Cookie Clicker in Minecraft
+
+Click to get cookies
+- Press 'c' to buy buildings
+- Press 'v' to buy upgrades
