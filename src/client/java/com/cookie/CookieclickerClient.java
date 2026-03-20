@@ -19,6 +19,7 @@ import org.joml.Matrix3x2fStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class CookieclickerClient implements ClientModInitializer {
 
@@ -102,7 +103,7 @@ public class CookieclickerClient implements ClientModInitializer {
 			graphics.drawString(client.font, "Cookies: " + Cookie.format(Cookie.cookies), 2, 5, 0xFFFFFFFF, true);
 			graphics.drawString(client.font, "Cookies Per Second: " + Cookie.format(Cookie.cookiesPerSecond), 2, 15, 0xFFFFFFFF, true);
 			graphics.drawString(client.font, "Max Cookies: " + Cookie.format(Cookie.maxCookies), 2, 25, 0xFFFFFFFF, true);
-			graphics.drawString(client.font, "Milk%: " + Cookie.format(BigDecimal.valueOf(Cookie.getMilk())), 2, 35, 0xFFFFFFFF, true);
+			graphics.drawString(client.font, "Milk%: " + Cookie.format(BigDecimal.valueOf(Cookie.getMilk()).setScale(2, RoundingMode.HALF_UP)), 2, 35, 0xFFFFFFFF, true);
 
 			// Draw milk
 			graphics.fill(0, Cookie.milkSize(graphics.guiHeight(), Cookie.getMilk()), graphics.guiWidth(), graphics.guiHeight(), 0x66FFFFFF);
