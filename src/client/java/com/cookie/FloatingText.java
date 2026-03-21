@@ -13,7 +13,7 @@ public class FloatingText {
     }
 
     public void tick() {
-        this.age += 0.05;
         this.y -= 1.0;
+        this.age += 0.05;
     }
 }

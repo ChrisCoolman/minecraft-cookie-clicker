@@ -1,13 +1,18 @@
 package com.cookie;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 
+import java.io.*;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.math.BigDecimal;
@@ -22,6 +27,9 @@ public class Cookie {
     public static Double milk;
     public static Double milkFactor;
 
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Path SAVE_PATH = FabricLoader.getInstance().getConfigDir().resolve("cookieclicker_save.json");
+    public static int secondsPassed;
 
     public static final BigDecimal million = BigDecimal.valueOf(Math.pow(10, 6));
     public static final BigDecimal billion = BigDecimal.valueOf(Math.pow(10, 9));
@@ -42,13 +50,15 @@ public class Cookie {
 
     public static void start() {
         // Init values - should not run if saves are added
-        cookies = BigDecimal.valueOf(50000);
+        cookies = BigDecimal.ZERO;
         cookiesPerClick = BigDecimal.ONE;
         cookiesPerSecond = BigDecimal.ZERO;
         maxCookies = BigDecimal.ZERO;
-        handMadeCookies = BigDecimal.valueOf(1000);
+        handMadeCookies = BigDecimal.ZERO;
         clickCps = 0;
         milkFactor = 0.0;
+
+        secondsPassed = 0;
 
         // Add buildings
         BUILDINGS.clear();
@@ -103,13 +113,12 @@ public class Cookie {
         TOTAL_UPGRADES.add(new Upgrade("Ultradrill", million.multiply(BigDecimal.valueOf(6)), "Farm", 2, 25));
         TOTAL_UPGRADES.add(new Upgrade("Ultimadrill", million.multiply(BigDecimal.valueOf(600)), "Farm", 2, 50));
         // Factory upgrades
-        TOTAL_UPGRADES.add(new Upgrade("Sturdier conveyor belts", million.multiply(BigDecimal.valueOf(1.3)), "Farm", 2, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Child labor", million.multiply(BigDecimal.valueOf(6.5)), "Farm", 2, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Sweatshop", million.multiply(BigDecimal.valueOf(65)), "Farm", 2, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Radium reactors", billion.multiply(BigDecimal.valueOf(6.5)), "Farm", 2, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Recombobulators", billion.multiply(BigDecimal.valueOf(650)), "Farm", 2, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Deep-bake process", trillion.multiply(BigDecimal.valueOf(65)), "Farm", 2, 1));
-        // Bank upgrades
+        TOTAL_UPGRADES.add(new Upgrade("Sturdier conveyor belts", million.multiply(BigDecimal.valueOf(1.3)), "Factory", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Child labor", million.multiply(BigDecimal.valueOf(6.5)), "Factory", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Sweatshop", million.multiply(BigDecimal.valueOf(65)), "Factory", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Radium reactors", billion.multiply(BigDecimal.valueOf(6.5)), "Factory", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Recombobulators", billion.multiply(BigDecimal.valueOf(650)), "Factory", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Deep-bake process", trillion.multiply(BigDecimal.valueOf(65)), "Factory", 2, 1));
     }
 
     // Takes a name as input and finds a building with that name
@@ -123,10 +132,12 @@ public class Cookie {
         return BUILDINGS.getFirst();
     }
 
-    public static void mouseDown() {
+    public static void mouseDown(boolean gameEnabled) {
         cookies = cookies.add(cookiesPerClick);
         handMadeCookies = handMadeCookies.add(cookiesPerClick);
-        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.GENERIC_EAT, 0.8f + (float) Math.random() * 0.4f));
+        if (gameEnabled) {
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.GENERIC_EAT, 0.8f + (float) Math.random() * 0.4f));
+        }
     }
 
     public static void mouseUp() {
@@ -144,7 +155,7 @@ public class Cookie {
 
         cookiesPerSecond = baseCPS.multiply(BigDecimal.valueOf(1 + milkFactor)).setScale(2, RoundingMode.HALF_UP);
 
-        cookies = cookies.add(cookiesPerSecond.divide(BigDecimal.valueOf(20), 4, RoundingMode.HALF_UP));
+        cookies = cookies.add(cookiesPerSecond);
 
         if(cookies.compareTo(maxCookies) >= 0) {
             maxCookies = cookies;
@@ -154,6 +165,13 @@ public class Cookie {
         cookiesPerClick = BigDecimal.ONE.add(bonusCPC).setScale(2, RoundingMode.HALF_UP);
 
         checkUnlocks();
+
+        // Save every 10 seconds
+        secondsPassed += 1;
+        if(secondsPassed >= 10) {
+            Cookie.save();
+            secondsPassed = 0;
+        }
 
     }
 
@@ -237,6 +255,85 @@ public class Cookie {
             total = total.add(BigDecimal.valueOf(b.amountPurchased).multiply(BigDecimal.valueOf(b.baseCookiesPerSecond)));
         }
         return total;
+    }
+
+    public static void save() {
+        try(Writer writer = new FileWriter(SAVE_PATH.toFile())) {
+            SaveData data = new SaveData();
+            data.cookies = cookies.toString();
+            data.cookiesPerSecond = cookiesPerSecond.toString();
+            data.handMadeCookies = handMadeCookies.toString();
+            data.maxCookies = maxCookies.toString();
+
+            // Save all buildings and upgrades
+            for(Building b : BUILDINGS) {
+                data.buildings.put(b.name, b.amountPurchased);
+            }
+
+            for(Upgrade u : TOTAL_UPGRADES) {
+                if(u.purchased) {
+                    data.purchasedUpgrades.add(u.name);
+                }
+            }
+
+            for(Kitten k : TOTAL_KITTENS) {
+                if(k.purchased) {
+                    data.purchasedUpgrades.add(k.name);
+                }
+            }
+
+            for(ClickUpgrade cu : TOTAL_CLICK_UPGRADE) {
+                if(cu.purchased) {
+                    data.purchasedUpgrades.add(cu.name);
+                }
+            }
+
+            GSON.toJson(data, writer);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void load() {
+        File file = SAVE_PATH.toFile();
+        if(!file.exists()) {
+            return;
+        }
+
+        try (Reader reader = new FileReader(file)) {
+            SaveData data = GSON.fromJson(reader, SaveData.class);
+
+            cookies = new BigDecimal(data.cookies);
+            cookiesPerSecond = new BigDecimal(data.cookiesPerSecond);
+            handMadeCookies = new BigDecimal(data.handMadeCookies);
+            maxCookies = new BigDecimal(data.maxCookies);
+
+            for (Building b : BUILDINGS) {
+                if(data.buildings.containsKey(b.name)) {
+                    b.amountPurchased = data.buildings.get(b.name);
+                }
+            }
+            for (Upgrade b : UPGRADES) {
+                if(data.purchasedUpgrades.contains(b.name)) {
+                    b.purchased = true;
+                    b.isUnlocked = true;
+                }
+            }
+            for (Kitten b : KITTENS) {
+                if(data.purchasedKittens.contains(b.name)) {
+                    b.purchased = true;
+                }
+            }
+            for (ClickUpgrade b : CLICK_UPGRADES) {
+                if(data.purchasedClickUpgrades.contains(b.name)) {
+                    b.purchased = true;
+                }
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 
