@@ -1,6 +1,15 @@
-# Cookie Clicker in Minecraft
+# 🍪 Cookie Clicker in Minecraft 
 This is a recreation of Cookie Clicker in Minecraft
 
-Click to get cookies
+## ⭐ Current features:
+- Buildings up to the wizard tower
+- Upgrades for buildings
+- Cps upgrades
+- Milk system
+- Kitten upgrades
+- Game saving
+
+Controls:
 - Press 'c' to buy buildings
 - Press 'v' to buy upgrades
+- Press ',' to toggle game
