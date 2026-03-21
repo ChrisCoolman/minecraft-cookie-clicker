@@ -68,7 +68,30 @@ public class UpgradeScreen extends Screen {
                 button.active = true;
             }
 
-            Cookie.milkFactor += u.milkFactor;
+            this.addRenderableWidget(button);
+            // x, y, width, height
+            // always make height 20
+        }
+
+        // Click upgrades
+        for (int i = 0; i < Cookie.CLICK_UPGRADES.size(); i++) {
+            ClickUpgrade u = Cookie.CLICK_UPGRADES.get(i);
+            int y = startY + (i * spacing);
+
+            Button button = Button.builder(Component.literal(" Purchase " + u.name + " -  " + Cookie.format(u.price)), (btn) -> {
+                u.purchased = true;
+                Cookie.CLICK_UPGRADES.remove(u);
+                // Levelup sound
+                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.PLAYER_LEVELUP, 1.0f));
+                this.rebuildWidgets(); // refresh when bought
+            }).bounds(x, y, buttonWidth, 20).tooltip(Tooltip.create(Component.literal("Clicking gains 1% of CPS"))).build();
+
+            if (Cookie.cookies.compareTo(u.price) == -1) {
+                button.active = false;
+            }
+            else {
+                button.active = true;
+            }
 
 
             this.addRenderableWidget(button);

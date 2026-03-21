@@ -17,6 +17,8 @@ public class Cookie {
     public static BigDecimal cookiesPerClick;
     public static BigDecimal cookiesPerSecond;
     public static BigDecimal maxCookies;
+    public static BigDecimal handMadeCookies;
+    public static double clickCps;
     public static Double milk;
     public static Double milkFactor;
 
@@ -35,12 +37,17 @@ public class Cookie {
     public static final List<Kitten> TOTAL_KITTENS = new ArrayList<>();
     public static List<Kitten> KITTENS = new ArrayList<>();
 
+    public static final List<ClickUpgrade> TOTAL_CLICK_UPGRADE = new ArrayList<>();
+    public static List<ClickUpgrade> CLICK_UPGRADES = new ArrayList<>();
+
     public static void start() {
         // Init values - should not run if saves are added
-        cookies = BigDecimal.ZERO;
+        cookies = BigDecimal.valueOf(50000);
         cookiesPerClick = BigDecimal.ONE;
         cookiesPerSecond = BigDecimal.ZERO;
         maxCookies = BigDecimal.ZERO;
+        handMadeCookies = BigDecimal.valueOf(1000);
+        clickCps = 0;
         milkFactor = 0.0;
 
         // Add buildings
@@ -58,33 +65,51 @@ public class Cookie {
         UPGRADES.clear();
         TOTAL_UPGRADES.clear();
         TOTAL_KITTENS.clear();
+        TOTAL_CLICK_UPGRADE.clear();
+
+        TOTAL_CLICK_UPGRADE.add(new ClickUpgrade("Plastic Mouse", BigDecimal.valueOf(1000), BigDecimal.valueOf(50000), false));
+        TOTAL_CLICK_UPGRADE.add(new ClickUpgrade("Iron Mouse", BigDecimal.valueOf(100000), million.multiply(BigDecimal.valueOf(5)), false));
+        TOTAL_CLICK_UPGRADE.add(new ClickUpgrade("Titanium Mouse", million.multiply(BigDecimal.valueOf(10)), million.multiply(BigDecimal.valueOf(500)), false));
+        TOTAL_CLICK_UPGRADE.add(new ClickUpgrade("Adamantium Mouse", billion, billion.multiply(BigDecimal.valueOf(50)), false));
+        TOTAL_CLICK_UPGRADE.add(new ClickUpgrade("Unobtainium Mouse", billion.multiply(BigDecimal.valueOf(100)), trillion.multiply(BigDecimal.valueOf(5)), false));
+        TOTAL_CLICK_UPGRADE.add(new ClickUpgrade("Eludium Mouse", trillion.multiply(BigDecimal.valueOf(10)), trillion.multiply(BigDecimal.valueOf(500)), false));
 
         TOTAL_KITTENS.add(new Kitten("Kitten helpers", (million.multiply(BigDecimal.valueOf(9))), 0.52, 0.1, false));
         TOTAL_KITTENS.add(new Kitten("Kitten workers", (billion.multiply(BigDecimal.valueOf(9))), 1.0, 0.125, false));
         TOTAL_KITTENS.add(new Kitten("Kitten engineers", (trillion.multiply(BigDecimal.valueOf(90))), 2.0, 0.15, false));
 
         // Cursor upgrades
-        TOTAL_UPGRADES.add(new Upgrade("Reinforced index finger", 100, "Cursor", 2, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Carpal tunnel prevention cream", 500, "Cursor", 2, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Ambidextrous", 10000, "Cursor", 2, 10));
+        TOTAL_UPGRADES.add(new Upgrade("Reinforced index finger", BigDecimal.valueOf(100), "Cursor", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Carpal tunnel prevention cream", BigDecimal.valueOf(500), "Cursor", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Ambidextrous", BigDecimal.valueOf(10000), "Cursor", 2, 10));
         // Grandma upgrades
-        TOTAL_UPGRADES.add(new Upgrade("Forwards from grandma", 1000, "Grandma", 2, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Steel-plated rolling pins", 5000, "Grandma", 2, 5));
-        TOTAL_UPGRADES.add(new Upgrade("Lubricated dentures", 50000, "Grandma", 2, 25));
-        TOTAL_UPGRADES.add(new Upgrade("Prune juice", 5000000, "Grandma", 2, 50));
-        TOTAL_UPGRADES.add(new Upgrade("Double-thhick glasses", 500000000, "Grandma", 2, 100));
-        //TOTAL_UPGRADES.add(new Upgrade("Aging agents", 50000000000, "Grandma", 2, 5));
-        //TOTAL_UPGRADES.add(new Upgrade("Xtreme walkers", 50000000000000, "Grandma", 2, 5));
+        TOTAL_UPGRADES.add(new Upgrade("Forwards from grandma", BigDecimal.valueOf(1000), "Grandma", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Steel-plated rolling pins", BigDecimal.valueOf(5000), "Grandma", 2, 5));
+        TOTAL_UPGRADES.add(new Upgrade("Lubricated dentures", BigDecimal.valueOf(50000), "Grandma", 2, 25));
+        TOTAL_UPGRADES.add(new Upgrade("Prune juice", million.multiply(BigDecimal.valueOf(5)), "Grandma", 2, 50));
+        TOTAL_UPGRADES.add(new Upgrade("Double-thick glasses", million.multiply(BigDecimal.valueOf(500)), "Grandma", 2, 100));
+        TOTAL_UPGRADES.add(new Upgrade("Aging agents", billion.multiply(BigDecimal.valueOf(50)), "Grandma", 2, 150));
+        TOTAL_UPGRADES.add(new Upgrade("Xtreme walkers", trillion.multiply(BigDecimal.valueOf(50)), "Grandma", 2, 200));
         // Farm upgrades
-        TOTAL_UPGRADES.add(new Upgrade("Cheap hoes", 11000, "Farm", 2, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Fertilizer", 55000, "Farm", 2, 5));
-        TOTAL_UPGRADES.add(new Upgrade("Cookie trees", 550000, "Farm", 2, 25));
-        TOTAL_UPGRADES.add(new Upgrade("Genetically-modified cookies", 55000000, "Farm", 2, 50));
+        TOTAL_UPGRADES.add(new Upgrade("Cheap hoes", BigDecimal.valueOf(11000), "Farm", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Fertilizer", BigDecimal.valueOf(55000), "Farm", 2, 5));
+        TOTAL_UPGRADES.add(new Upgrade("Cookie trees", BigDecimal.valueOf(550000), "Farm", 2, 25));
+        TOTAL_UPGRADES.add(new Upgrade("Genetically-modified cookies", million.multiply(BigDecimal.valueOf(55)), "Farm", 2, 50));
+        TOTAL_UPGRADES.add(new Upgrade("Gingerbread scarecrows", billion.multiply(BigDecimal.valueOf(5.5)), "Farm", 2, 100));
+        TOTAL_UPGRADES.add(new Upgrade("Pulsar sprinklers", billion.multiply(BigDecimal.valueOf(550)), "Farm", 2, 150));
         // Mine upgrades
-        TOTAL_UPGRADES.add(new Upgrade("Sugar gas", 120000, "Farm", 2, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Megadrill", 600000, "Farm", 2, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Ultradrill", 6000000, "Farm", 2, 1));
-        TOTAL_UPGRADES.add(new Upgrade("Ultimadrill", 600000000, "Farm", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Sugar gas", BigDecimal.valueOf(120000), "Farm", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Megadrill", BigDecimal.valueOf(600000), "Farm", 2, 5));
+        TOTAL_UPGRADES.add(new Upgrade("Ultradrill", million.multiply(BigDecimal.valueOf(6)), "Farm", 2, 25));
+        TOTAL_UPGRADES.add(new Upgrade("Ultimadrill", million.multiply(BigDecimal.valueOf(600)), "Farm", 2, 50));
+        // Factory upgrades
+        TOTAL_UPGRADES.add(new Upgrade("Sturdier conveyor belts", million.multiply(BigDecimal.valueOf(1.3)), "Farm", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Child labor", million.multiply(BigDecimal.valueOf(6.5)), "Farm", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Sweatshop", million.multiply(BigDecimal.valueOf(65)), "Farm", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Radium reactors", billion.multiply(BigDecimal.valueOf(6.5)), "Farm", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Recombobulators", billion.multiply(BigDecimal.valueOf(650)), "Farm", 2, 1));
+        TOTAL_UPGRADES.add(new Upgrade("Deep-bake process", trillion.multiply(BigDecimal.valueOf(65)), "Farm", 2, 1));
+        // Bank upgrades
     }
 
     // Takes a name as input and finds a building with that name
@@ -100,6 +125,7 @@ public class Cookie {
 
     public static void mouseDown() {
         cookies = cookies.add(cookiesPerClick);
+        handMadeCookies = handMadeCookies.add(cookiesPerClick);
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.GENERIC_EAT, 0.8f + (float) Math.random() * 0.4f));
     }
 
@@ -109,34 +135,48 @@ public class Cookie {
 
     // Runs every second
     public static void tick() {
-        cookies = cookies.add(calculateCookiesPerSecond());
+        BigDecimal baseCPS = calcBaseCPS();
 
-        // Round to 2 decimal places - https://stackoverflow.com/questions/15643280/rounding-bigdecimal-to-always-have-two-decimal-places
-        cookies = cookies.setScale(2, RoundingMode.CEILING);
-        cookiesPerSecond = cookiesPerSecond.setScale(2, RoundingMode.CEILING).multiply(BigDecimal.valueOf(1 + milkFactor));
-        cookiesPerClick = cookiesPerClick.setScale(2, RoundingMode.CEILING);
+        milkFactor = 0.0;
+        for(Kitten k : KITTENS) {
+            milkFactor += (getMilk() * k.milkFactor);
+        }
 
-        if (cookies.compareTo(maxCookies) >= 0) {
+        cookiesPerSecond = baseCPS.multiply(BigDecimal.valueOf(1 + milkFactor)).setScale(2, RoundingMode.HALF_UP);
+
+        cookies = cookies.add(cookiesPerSecond.divide(BigDecimal.valueOf(20), 4, RoundingMode.HALF_UP));
+
+        if(cookies.compareTo(maxCookies) >= 0) {
             maxCookies = cookies;
         }
 
-        // Milk
-        milk = getMilk();
+        BigDecimal bonusCPC = cookiesPerSecond.multiply(BigDecimal.valueOf(clickCps));
+        cookiesPerClick = BigDecimal.ONE.add(bonusCPC).setScale(2, RoundingMode.HALF_UP);
 
+        checkUnlocks();
+
+    }
+
+    public static void checkUnlocks() {
         // Gets every upgrade
-        for (int i = 0; i < TOTAL_UPGRADES.size(); i++) {
-            // If you have enough buildings and the upgrade is not unlocked give the upgrade
-            if (getBuilding(TOTAL_UPGRADES.get(i).building).amountPurchased >= TOTAL_UPGRADES.get(i).unlockBuildingCount && !TOTAL_UPGRADES.get(i).isUnlocked) {
-                UPGRADES.add(TOTAL_UPGRADES.get(i));
-                TOTAL_UPGRADES.get(i).isUnlocked = true;
+        for (Upgrade u : TOTAL_UPGRADES) {
+            if(!u.isUnlocked && getBuilding(u.building).amountPurchased >= u.unlockBuildingCount) {
+                UPGRADES.add(u);
+                u.isUnlocked = true;
             }
         }
-
         // Gets every kitten
-        for (int i = 0; i < TOTAL_KITTENS.size(); i++) {
-            if (TOTAL_KITTENS.get(i).unlockMilk < getMilk() && !TOTAL_KITTENS.get(i).purchased) {
-                TOTAL_KITTENS.get(i).purchased = true;
-                KITTENS.add(TOTAL_KITTENS.get(i));
+        for (Kitten k : TOTAL_KITTENS) {
+            if(!k.purchased && getMilk() >= k.unlockMilk) {
+                KITTENS.add(k);
+            }
+        }
+        // Gets every click upgrade
+        for(ClickUpgrade cu : TOTAL_CLICK_UPGRADE) {
+            if(!cu.purchased && handMadeCookies.compareTo(cu.unlockCondition) >= 0) {
+                cu.purchased = true;
+                clickCps += 0.01;
+                CLICK_UPGRADES.add(cu);
             }
         }
     }
@@ -189,6 +229,14 @@ public class Cookie {
             int currentHeight = (int) (heightPerc * maxHeight);
             return height - currentHeight;
         }
+    }
+
+    public static BigDecimal calcBaseCPS() {
+        BigDecimal total = BigDecimal.ZERO;
+        for(Building b : BUILDINGS) {
+            total = total.add(BigDecimal.valueOf(b.amountPurchased).multiply(BigDecimal.valueOf(b.baseCookiesPerSecond)));
+        }
+        return total;
     }
 }
 

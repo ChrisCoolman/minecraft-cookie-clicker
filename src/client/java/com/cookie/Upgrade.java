@@ -11,9 +11,9 @@ public class Upgrade {
     public boolean isUnlocked = false;
     public double unlockBuildingCount;
 
-    public Upgrade(String name, double price, String building, double multiplier, double unlockBuildingCount) {
+    public Upgrade(String name, BigDecimal price, String building, double multiplier, double unlockBuildingCount) {
         this.name = name;
-        this.price = BigDecimal.valueOf(price);
+        this.price = price;
         this.building = building;
         this.multiplier = multiplier;
         this.unlockBuildingCount = unlockBuildingCount;
