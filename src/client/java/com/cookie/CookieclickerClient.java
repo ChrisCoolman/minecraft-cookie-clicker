@@ -60,7 +60,7 @@ public class CookieclickerClient implements ClientModInitializer {
 		KeyMapping openBuildings = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.cookie-clicker.open_buildings_screen", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, CATEGORY));
 		KeyMapping openUpgrades = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.cookie-clicker.open_upgrades_screen", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, CATEGORY));
 		KeyMapping toggleGame = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.cookie-clicker.toggle_game", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_COMMA, CATEGORY));
-		KeyMapping debug = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.cookie-clicker.debug", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, CATEGORY));
+		//KeyMapping debug = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.cookie-clicker.debug", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, CATEGORY));
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			boolean isPressed = client.mouseHandler.isLeftPressed();
@@ -116,6 +116,7 @@ public class CookieclickerClient implements ClientModInitializer {
 					gameEnabled = !gameEnabled;
 				}
 			}
+			/*
 			while (debug.consumeClick()) {
 				if(client.player != null) {
 					//client.player.displayClientMessage(Component.literal("Opening cookie clicker!"), false);
@@ -130,7 +131,7 @@ public class CookieclickerClient implements ClientModInitializer {
 						gc.active = false;
 					}
 				}
-			}
+			}*/
 		});
 		// Save on exit
 		ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
