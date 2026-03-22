@@ -26,6 +26,13 @@ public class Cookie {
     public static double clickCps;
     public static Double milk;
     public static Double milkFactor;
+    public static int timer;
+
+    public static int cookieSecondsLeft;
+
+    public static boolean frenzy;
+    public static boolean lucky;
+    public static boolean clickFrenzy;
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path SAVE_PATH = FabricLoader.getInstance().getConfigDir().resolve("cookieclicker_save.json");
@@ -59,6 +66,12 @@ public class Cookie {
         milkFactor = 0.0;
 
         secondsPassed = 0;
+
+        frenzy = false;
+        lucky = false;
+        clickFrenzy = false;
+
+        cookieSecondsLeft = 0;
 
         // Add buildings
         BUILDINGS.clear();
@@ -133,8 +146,14 @@ public class Cookie {
     }
 
     public static void mouseDown(boolean gameEnabled) {
-        cookies = cookies.add(cookiesPerClick);
-        handMadeCookies = handMadeCookies.add(cookiesPerClick);
+        if(!clickFrenzy) {
+            cookies = cookies.add(cookiesPerClick);
+            handMadeCookies = handMadeCookies.add(cookiesPerClick);
+        }
+        else {
+            cookies = cookies.add(cookiesPerClick.multiply(BigDecimal.valueOf(777)));
+            handMadeCookies = handMadeCookies.add(cookiesPerClick.multiply(BigDecimal.valueOf(777)));
+        }
         if (gameEnabled) {
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.GENERIC_EAT, 0.8f + (float) Math.random() * 0.4f));
         }
@@ -153,7 +172,13 @@ public class Cookie {
             milkFactor += (getMilk() * k.milkFactor);
         }
 
-        cookiesPerSecond = baseCPS.multiply(BigDecimal.valueOf(1 + milkFactor)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal multiplier = BigDecimal.valueOf(1 + milkFactor);
+
+        if(frenzy) {
+            multiplier = multiplier.multiply(BigDecimal.valueOf(7));
+        }
+
+        cookiesPerSecond = baseCPS.multiply(multiplier).setScale(2, RoundingMode.HALF_UP);
 
         cookies = cookies.add(cookiesPerSecond);
 
@@ -173,6 +198,69 @@ public class Cookie {
             secondsPassed = 0;
         }
 
+        if(timer > 0) {
+            timer -= 1;
+        }
+        else if (timer == 0) {
+            frenzy = false;
+            lucky = false;
+            clickFrenzy = false;
+            timer = -1;
+        }
+
+        if(cookieSecondsLeft > 0) {
+            cookieSecondsLeft -= 1;
+        }
+        else if (cookieSecondsLeft == 0) {
+            CookieclickerClient.gc.active = false;
+            cookieSecondsLeft = -1;
+        }
+
+        double randomNumber = Math.random();
+        if(randomNumber <= 0.01 && CookieclickerClient.gc.active == false && cookieSecondsLeft == -1 && timer == -1) {
+            cookieSecondsLeft = 10;
+            CookieclickerClient.gc.active = true;
+            // random size 4 - 10
+            int size = 4 + (int)(Math.random() * ((10 - 4) + 1));
+            CookieclickerClient.gc.startNew(size);
+
+        }
+
+    }
+
+    public static void goldenCookieSuccess() {
+        double num = Math.random();
+        if(num < 0.2) {
+            timer = 13;
+            // click frenzy
+            clickFrenzy = true;
+        }
+        else if(num < 0.6) {
+            timer = 77;
+            // frenzy
+            frenzy = true;
+        }
+        else {
+            // Lucky!
+            lucky = true;
+            // FROM COOKIE CLICKER WIKI
+            // 15% of cookies banked + 13
+            BigDecimal option2 = cookies.multiply(BigDecimal.valueOf(0.15)).add(BigDecimal.valueOf(13));
+            // 15 minutes worth of cookies (CpS * 900) + 13
+            BigDecimal option1 = cookiesPerSecond.multiply(BigDecimal.valueOf(900)).add(BigDecimal.valueOf(13));
+
+            BigDecimal choice;
+            //Instantly gain cookies, whichever gives less:
+            if(option1.compareTo(option2) <= 0) {
+                choice = option1;
+            }
+            else {
+                choice = option2;
+
+            }
+            cookies = cookies.add(choice);
+            CookieclickerClient.activeTexts.add(new FloatingText(0, 0, "LUCKY! +" + format(choice)));
+        }
     }
 
     public static void checkUnlocks() {
@@ -200,7 +288,7 @@ public class Cookie {
     }
 
     public static String format(BigDecimal num) {
-
+        num = num.setScale(2, RoundingMode.HALF_DOWN);
         // Compare to returns 1 for greater than
         if (num.compareTo(trillion) >= 0) {
             num = num.divide(trillion, 2, RoundingMode.HALF_UP);
